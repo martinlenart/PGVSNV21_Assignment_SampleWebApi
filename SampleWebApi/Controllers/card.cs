@@ -51,14 +51,14 @@ namespace SampleWebApi.Controllers
 
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(DealCard))]
+        [ProducesResponseType(200, Type = typeof(PlayingCard))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> DealCard()
         {
             if (myGame.IsRunning)
             {
                 _NrOfCardsDealt++;
-                var ret = new DealCard { Card = PlayingCard.CreateRandom(), NrOfCardsDealt = _NrOfCardsDealt };
+                var ret = SingletonCards.Instance.myCard1;
 
                 return Ok(ret);
             }
@@ -66,7 +66,7 @@ namespace SampleWebApi.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(200, Type = typeof(DealCards))]
+        [ProducesResponseType(200, Type = typeof(List<PlayingCard>))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> DealCards(string NrOfCards)
         {
@@ -77,17 +77,37 @@ namespace SampleWebApi.Controllers
             if (int.TryParse(NrOfCards, out nrOfCards) && nrOfCards > 0 && nrOfCards < 10)
             {
                 _NrOfCardsDealt += nrOfCards;
-                DealCards ret = new DealCards { NrOfCardsDealt = nrOfCards };
+                List<PlayingCard> ret = new List<PlayingCard>();
 
-                for (int i = 0; i < nrOfCards; i++)
-                {
-                    ret.Cards.Add(PlayingCard.CreateRandom());
-                }
+                //for (int i = 0; i < nrOfCards; i++)
+                //{
+                ret.Add(SingletonCards.Instance.myCard1);
+                ret.Add(SingletonCards.Instance.myCard2);
+                //}
                 return Ok(ret);
             }
             return BadRequest($"Cannot interpret NrOfCards");
         }
 
+        //POST: api/winningcards   
+        //Body: List<PlayingCard> in Json
+        [HttpPost]                          //Needs to be PUT or POST as I have a request Body
+        [ProducesResponseType(200, Type = typeof(List<PlayingCard>))]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> WinningCards([FromBody] List<PlayingCard> hand)
+        {
+            if (!myGame.IsRunning)
+                return BadRequest($"No game is running");
+
+            if (hand.Count < 1)
+                return BadRequest($"Empty hand");
+
+            //logik som avgor vinnande handen
+            List<PlayingCard> winners = new List<PlayingCard>();
+            winners.Add(hand[0]);
+
+            return Ok(winners);
+        }
     }
 }
 

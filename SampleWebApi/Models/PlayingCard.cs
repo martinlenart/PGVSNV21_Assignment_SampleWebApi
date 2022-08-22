@@ -54,15 +54,4 @@ namespace SampleWebApi.Models
 			return card;
 		}
     }
-
-	public class DealCard
-	{
-		public PlayingCard Card { get; set; }
-		public int NrOfCardsDealt { get; set; }
-	}
-    public class DealCards
-    {
-		public List<PlayingCard> Cards { get; set; } = new List<PlayingCard>();
-        public int NrOfCardsDealt { get; set; }
-    }
 }

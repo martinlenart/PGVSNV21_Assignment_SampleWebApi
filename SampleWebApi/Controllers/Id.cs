@@ -13,11 +13,11 @@ namespace SampleWebApi.Controllers
     [Route("[controller]")]
     public class IdController : ControllerBase
     {
-        [HttpGet(Name = "Id")]
+        [HttpGet]
         // GET: /Id
         public IEnumerable<string> Get()
         {
-            return new string[] { "Hello World", "I am a Sample Controller" };
+            return new string[] { "Hello World", "I am a Sample Controller", $"Weatherforecast shown {WeatherForecastController.Counter} times"};
         }
     }
 }

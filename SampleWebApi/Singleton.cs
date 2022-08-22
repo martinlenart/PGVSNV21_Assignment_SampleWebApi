@@ -3,31 +3,30 @@ using SampleWebApi.Models;
 
 namespace SampleWebApi
 {
-	public class SingletonCards
+	public class GameManager
 	{
-        private static SingletonCards _instance = null;
+        private static GameManager _instance = null;
 
-        public PlayingCard myCard1 { get; }
-        public PlayingCard myCard2 { get; }
+        public DeckOfCards myDeck = null;
+        public GameSession myGame = null;
 
-
-        public static SingletonCards Instance
+        public static GameManager Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new SingletonCards();
+                    _instance = new GameManager();
                     return _instance;
                 }
                 return _instance;
             }
         }
 
-        private SingletonCards()
+        private GameManager()
 		{
-            myCard1 = PlayingCard.CreateRandom();
-            myCard2 = PlayingCard.CreateRandom();
+            myDeck = new DeckOfCards();
+            myGame = new GameSession();
         }
     }
 }

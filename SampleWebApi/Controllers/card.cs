@@ -19,20 +19,18 @@ namespace SampleWebApi.Controllers
     [Route("api/[controller]/[action]")]
     public class CardController : ControllerBase
     {
-        static int _NrOfCardsDealt = 0;
-        static GameSession myGame = new GameSession();
-
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(GameSession))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> StartGame(string gameType)
         {
-            if (!myGame.IsRunning)
+            if (!GameManager.Instance.myGame.IsRunning)
             {
-                myGame.StartGame(gameType.ToLower().Trim());
-                return Ok(myGame);
+                GameManager.Instance.myGame.StartGame(gameType.ToLower().Trim());
+                GameManager.Instance.myDeck.Shuffle();
+                return Ok(GameManager.Instance.myGame);
             }
-            return BadRequest($"Game of type {myGame.GameType} is already running");
+            return BadRequest($"Game of type {GameManager.Instance.myGame.GameType} is already running");
         }
 
         [HttpGet]
@@ -40,10 +38,10 @@ namespace SampleWebApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> EndGame()
         {
-            if (myGame.IsRunning)
+            if (GameManager.Instance.myGame.IsRunning)
             {
-                myGame.EndGame();
-                return Ok(myGame);
+                GameManager.Instance.myGame.EndGame();
+                return Ok(GameManager.Instance.myGame);
             }
             return BadRequest($"No game is running");
         }
@@ -55,10 +53,9 @@ namespace SampleWebApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> DealCard()
         {
-            if (myGame.IsRunning)
+            if (GameManager.Instance.myGame.IsRunning)
             {
-                _NrOfCardsDealt++;
-                var ret = SingletonCards.Instance.myCard1;
+                 var ret = GameManager.Instance.myDeck.DealOne();
 
                 return Ok(ret);
             }
@@ -70,20 +67,18 @@ namespace SampleWebApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> DealCards(string NrOfCards)
         {
-            if (!myGame.IsRunning)
+            if (!GameManager.Instance.myGame.IsRunning)
                 return BadRequest($"No game is running");
 
             int nrOfCards;
             if (int.TryParse(NrOfCards, out nrOfCards) && nrOfCards > 0 && nrOfCards < 10)
             {
-                _NrOfCardsDealt += nrOfCards;
                 List<PlayingCard> ret = new List<PlayingCard>();
 
-                //for (int i = 0; i < nrOfCards; i++)
-                //{
-                ret.Add(SingletonCards.Instance.myCard1);
-                ret.Add(SingletonCards.Instance.myCard2);
-                //}
+                for (int i = 0; i < nrOfCards; i++)
+                {
+                    ret.Add(GameManager.Instance.myDeck.DealOne());
+                }
                 return Ok(ret);
             }
             return BadRequest($"Cannot interpret NrOfCards");
@@ -96,7 +91,7 @@ namespace SampleWebApi.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> WinningCards([FromBody] List<PlayingCard> hand)
         {
-            if (!myGame.IsRunning)
+            if (!GameManager.Instance.myGame.IsRunning)
                 return BadRequest($"No game is running");
 
             if (hand.Count < 1)
